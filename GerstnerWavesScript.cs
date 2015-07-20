@@ -24,6 +24,8 @@ namespace AssemblyCSharp
         private const int MaxWaveCount = 100;
         public int numberOfWaves = 10;
 
+        public float speed = 0.4f;
+
         private Vector3[] initialVertices;
 
         // Wave Amplitude (Min <= Ai <= Max)
@@ -50,8 +52,8 @@ namespace AssemblyCSharp
         private Vector2[] directions = new Vector2[MaxWaveCount];
 
         // Set to true to use random directions
-        public bool useRandomDirections = false;
-        private bool useRandomDirectionsOld = false;
+        public bool useRandomDirections = true;
+        private bool useRandomDirectionsOld = true;
 
         // Gravitational Constant
         private float g = 9.81f;
@@ -78,7 +80,7 @@ namespace AssemblyCSharp
                 Ai[i] = Random.Range(minAmplitude, maxAmplitude);
 
                 directions[i] = (useRandomDirections) ?
-                        new Vector2(Random.Range(0.1f, 2.0f), Random.Range(0.1f, 2.0f)) :
+                        new Vector2(Random.Range(-2.0f, 2.0f), Random.Range(-2.0f, 2.0f)) :
                         GenerateTargetDirections();
             }
         }
@@ -116,15 +118,15 @@ namespace AssemblyCSharp
                 Vector3 p_0 = initialVertices[vertCounter];
                 Vector2 x_0 = new Vector2(p_0[0], p_0[2]);
                 float y_0 = p_0[1];
-                float t = Time.time;
-                float phi = 2.0f;
+                float t = Time.time * speed;
+                float phi = (float)Math.PI;
 
                 Vector2 x_sum = new Vector2(0.0f, 0.0f);
                 float y = 0.0f;
                 for (int i = 0; i < numberOfWaves; i++)
                 {
                     x_sum += (directions[i] / ki[i]) * Ai[i] * (float)(Math.Sin(Vector2.Dot(directions[i], x_0) - frequencies[i] * t + phi));
-                    y += (float)(Ai[i] * Math.Cos(Vector2.Dot(directions[i], x_0) - frequencies[i] * t + phi));
+                    y += (float)(Ai[i] * Math.Cos(phi * Vector2.Dot(directions[i], x_0) - frequencies[i] * t));
                 }
 
                 Vector2 x = x_0 - x_sum;
@@ -170,21 +172,21 @@ namespace AssemblyCSharp
                     frequencies[i] = (float)(Math.Sqrt(g * ki[i] * Math.Tanh(ki[i] * waterDepth)));
                 }
 
-                if (maxAmplitude != maxAmplitudeOld 
+                if (maxAmplitude != maxAmplitudeOld
                     || minAmplitude != minAmplitudeOld)
                 {
                     Ai[i] = Random.Range(minAmplitude, maxAmplitude);
                 }
 
-                if (useRandomDirections != useRandomDirectionsOld 
+                if (useRandomDirections != useRandomDirectionsOld
                     || targetPoint != targetPointOld)
                 {
                     directions[i] = (useRandomDirections) ?
-                           new Vector2(Random.Range(0.1f, 2.0f), Random.Range(0.1f, 2.0f)) :
-                           GenerateTargetDirections(); 
+                           new Vector2(Random.Range(-2.0f, 2.0f), Random.Range(-2.0f, 2.0f)) :
+                           GenerateTargetDirections();
                 }
 
-                
+
             }
 
             // Reset flags
